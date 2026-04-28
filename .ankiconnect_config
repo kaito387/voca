@@ -1,5 +1,14 @@
 {
-  "deck_name": "llmvoca",
-  "model_name": "llmvoca",
-  "server_url": "http://127.0.0.1:8765"
+  "deck_name": "voca",
+  "model_name": "vocab_cloze",
+  "server_url": "http://127.0.0.1:8765",
+  "field_map": {
+    "sentence_cloze": "Sentence",
+    "hint": "Hint",
+    "meaning": "Meaning",
+    "structure": "Structure",
+    "usage": "Usage",
+    "extra": "Extra",
+    "source": "Source"
+  }
 }

@@ -52,11 +52,13 @@ class VocaWindow:
 
         ttk.Label(card_frame, text="Target").grid(row=1, column=0, sticky="w", pady=(0, 8))
         self.target_var = tk.StringVar()
-        ttk.Entry(card_frame, textvariable=self.target_var).grid(row=1, column=1, sticky="ew", pady=(0, 8))
+        self.target_entry = ttk.Entry(card_frame, textvariable=self.target_var)
+        self.target_entry.grid(row=1, column=1, sticky="ew", pady=(0, 8))
 
         ttk.Label(card_frame, text="Note / source (optional)").grid(row=2, column=0, sticky="w", pady=(0, 8))
         self.note_var = tk.StringVar()
-        ttk.Entry(card_frame, textvariable=self.note_var).grid(row=2, column=1, sticky="ew", pady=(0, 8))
+        self.note_entry = ttk.Entry(card_frame, textvariable=self.note_var)
+        self.note_entry.grid(row=2, column=1, sticky="ew", pady=(0, 8))
 
         anki_frame = ttk.LabelFrame(container, text="AnkiConnect settings", padding=12)
         anki_frame.grid(row=1, column=0, sticky="nsew", pady=(14, 0))
@@ -83,6 +85,13 @@ class VocaWindow:
         self.field_map_text.grid(row=3, column=1, sticky="ew", pady=(0, 8))
         if self.config.field_map:
             self.field_map_text.insert("1.0", json.dumps(self.config.field_map, ensure_ascii=False, indent=2))
+
+        # Bind Ctrl+A to select-all for text and entry widgets so users can easily
+        # select and delete content (helpful on platforms where Ctrl+A isn't bound)
+        self.sentence_text.bind("<Control-a>", self._select_all)
+        self.field_map_text.bind("<Control-a>", self._select_all)
+        self.target_entry.bind("<Control-a>", self._select_all)
+        self.note_entry.bind("<Control-a>", self._select_all)
 
         button_row = ttk.Frame(container)
         button_row.grid(row=2, column=0, sticky="ew", pady=(14, 0))
@@ -124,6 +133,18 @@ class VocaWindow:
 
     def _set_busy(self, busy: bool) -> None:
         self.submit_button.configure(state="disabled" if busy else "normal")
+
+    def _select_all(self, event: object) -> str:
+        widget = event.widget
+        try:
+            if isinstance(widget, tk.Text):
+                widget.tag_add("sel", "1.0", "end-1c")
+            else:
+                widget.select_range(0, "end")
+                widget.icursor("end")
+        except Exception:
+            pass
+        return "break"
 
     def _submit(self) -> None:
         sentence = self.sentence_text.get("1.0", "end").strip()
@@ -188,6 +209,14 @@ class VocaWindow:
         else:
             self.status_var.set("Card added to Anki.")
             messagebox.showinfo("voca", "Card added to Anki.")
+            # Clear input fields so the user can start a new card quickly
+            try:
+                self.sentence_text.delete("1.0", "end")
+            except Exception:
+                pass
+            self.target_var.set("")
+            self.note_var.set("")
+            self.status_var.set("Ready")
 
         self.root.after(100, self._poll_results)
 

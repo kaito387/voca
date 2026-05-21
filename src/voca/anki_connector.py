@@ -7,7 +7,7 @@ from typing import Any
 
 import requests
 
-from llm import GeneratedCard
+from .llm import GeneratedCard
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -15,10 +15,11 @@ CONFIG_PATH = BASE_DIR / ".ankiconnect_config"
 DEFAULT_SERVER_URL = "http://127.0.0.1:8765"
 DEFAULT_DECK_NAME = "Default"
 DEFAULT_MODEL_NAME = "Basic"
-PROXIES = {
-    "http://": "socks5://127.0.0.1:7890",
-    "https://": "socks5://127.0.0.1:7890",
-}
+
+# Use a session that ignores proxy environment variables so that ALL_PROXY and
+# similar settings never interfere with the local AnkiConnect connection.
+_no_proxy_session = requests.Session()
+_no_proxy_session.trust_env = False
 
 CARD_FIELDS = (
     "sentence_cloze",
@@ -114,7 +115,7 @@ def ensure_config(input_func=input) -> AnkiConnectConfig:
 
 def _request(config: AnkiConnectConfig, action: str, params: dict[str, Any] | None = None) -> Any:
     payload = {"action": action, "version": 6, "params": params or {}}
-    response = requests.post(config.server_url, json=payload, timeout=10, proxies=PROXIES)
+    response = _no_proxy_session.post(config.server_url, json=payload, timeout=10)
     response.raise_for_status()
     data = response.json()
     if data.get("error"):

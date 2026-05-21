@@ -1,12 +1,24 @@
 from __future__ import annotations
 
+import ctypes
+import ctypes.util
+import sys
+
+# X11 multi-threading support must be enabled before tkinter initialises Xlib,
+# otherwise background threads that touch X11 (e.g. via fontconfig / httpx)
+# will crash with "xcb_xlib_unknown_seq_number".
+if sys.platform.startswith("linux"):
+    _x11_path = ctypes.util.find_library("X11")
+    if _x11_path:
+        ctypes.cdll.LoadLibrary(_x11_path).XInitThreads()
+
 import json
 import queue
 import threading
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from anki_connector import (
+from .anki_connector import (
     AnkiConnectConfig,
     DEFAULT_DECK_NAME,
     DEFAULT_MODEL_NAME,
@@ -14,7 +26,7 @@ from anki_connector import (
     load_config,
     save_config,
 )
-from workflow import generate_and_submit
+from .workflow import generate_and_submit
 
 
 class VocaWindow:

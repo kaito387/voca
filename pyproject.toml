@@ -1,10 +1,17 @@
 [project]
 name = "voca"
-version = "0.1.0"
+version = "0.1.3"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "openai>=2.37.0",
     "requests>=2.34.2",
 ]
+
+[project.scripts]
+voca = "voca.cli:main"
+
+[tool.setuptools.package-data]
+voca = [".ankiconnect_config", "prompt.md"]

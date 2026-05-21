@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from anki_connector import AnkiConnectConfig, add_card_to_anki
-from llm import GeneratedCard, generate_anki_card
+from .anki_connector import AnkiConnectConfig, add_card_to_anki
+from .llm import GeneratedCard, generate_anki_card
 
 
 def generate_and_submit(

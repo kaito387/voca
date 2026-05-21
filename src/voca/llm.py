@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import httpx
 from openai import OpenAI
 
 
@@ -113,7 +114,8 @@ def generate_anki_card(sentence: str, target: str, note: str | None = None) -> G
 
     system_prompt = load_prompt_template()
     user_payload = _build_user_payload(sentence=sentence, target=target, note=note)
-    client = OpenAI(api_key=api_key, base_url=DEFAULT_BASE_URL)
+    http_client = httpx.Client(trust_env=False)
+    client = OpenAI(api_key=api_key, base_url=DEFAULT_BASE_URL, http_client=http_client)
 
     last_error: Exception | None = None
     for attempt in range(3):

@@ -1,0 +1,1 @@
+low-friction vocabulary card builder for anki

@@ -13,5 +13,18 @@ dependencies = [
 [project.scripts]
 voca = "voca.cli:main"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.package-data]
 voca = [".ankiconnect_config", "prompt.md"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+package = true

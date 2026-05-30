@@ -281,7 +281,7 @@ wheels = [
 [[package]]
 name = "voca"
 version = "0.1.4"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "httpx" },
     { name = "openai" },

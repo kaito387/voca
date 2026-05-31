@@ -58,7 +58,7 @@ class VocaWindow:
         card_frame.grid(row=0, column=0, sticky="nsew")
         card_frame.columnconfigure(1, weight=1)
 
-        ttk.Label(card_frame, text="Sentence").grid(row=0, column=0, sticky="nw", pady=(0, 8))
+        ttk.Label(card_frame, text="Sentence (optional)").grid(row=0, column=0, sticky="nw", pady=(0, 8))
         self.sentence_text = tk.Text(card_frame, height=5, wrap="word")
         self.sentence_text.grid(row=0, column=1, sticky="nsew", pady=(0, 8))
 
@@ -159,13 +159,10 @@ class VocaWindow:
         return "break"
 
     def _submit(self) -> None:
-        sentence = self.sentence_text.get("1.0", "end").strip()
+        sentence = self.sentence_text.get("1.0", "end").strip() or None
         target = self.target_var.get().strip()
         note = self.note_var.get().strip() or None
 
-        if not sentence:
-            messagebox.showerror("voca", "Sentence cannot be empty.")
-            return
         if not target:
             messagebox.showerror("voca", "Target cannot be empty.")
             return
@@ -194,7 +191,7 @@ class VocaWindow:
 
     def _run_submission(
         self,
-        sentence: str,
+        sentence: str | None,
         target: str,
         note: str | None,
         config: AnkiConnectConfig,

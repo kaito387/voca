@@ -5,7 +5,7 @@ from .llm import GeneratedCard, generate_anki_card
 
 
 def generate_and_submit(
-    sentence: str,
+    sentence: str | None,
     target: str,
     note: str | None,
     config: AnkiConnectConfig,

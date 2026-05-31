@@ -45,8 +45,8 @@ def load_prompt_template() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8").strip()
 
 
-def _build_user_payload(sentence: str, target: str, note: str | None = None) -> str:
-    payload: dict[str, Any] = {"sentence": sentence, "target": target}
+def _build_user_payload(sentence: str | None, target: str, note: str | None = None) -> str:
+    payload: dict[str, Any] = {"sentence": sentence or "", "target": target}
     if note:
         payload["note"] = note
     return json.dumps(payload, ensure_ascii=False, indent=2)
@@ -107,7 +107,7 @@ def _parse_card_response(raw_content: str) -> GeneratedCard:
     )
 
 
-def generate_anki_card(sentence: str, target: str, note: str | None = None) -> GeneratedCard:
+def generate_anki_card(sentence: str | None = None, target: str = "", note: str | None = None) -> GeneratedCard:
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
         raise RuntimeError("DEEPSEEK_API_KEY is not set.")

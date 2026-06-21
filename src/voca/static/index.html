@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>voca — vocabulary card generator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%237950f2'/><stop offset='100%25' stop-color='%23d6336c'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><text x='16' y='23' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='20' fill='white'>V</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-input: #f1f3f5;
+  --bg-hover: #e9ecef;
+  --border: #dee2e6;
+  --border-focus: #7950f2;
+  --text: #212529;
+  --text-secondary: #868e96;
+  --text-muted: #adb5bd;
+  --accent: #7950f2;
+  --accent-hover: #6741d9;
+  --accent-light: #f3f0ff;
+  --success: #40c057;
+  --error: #fa5252;
+  --error-bg: #fff5f5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1b1e;
+  --bg-card: #25262b;
+  --bg-input: #2c2e33;
+  --bg-hover: #373a40;
+  --border: #373a40;
+  --border-focus: #9775fa;
+  --text: #e9ecef;
+  --text-secondary: #909296;
+  --text-muted: #5c5f66;
+  --accent: #9775fa;
+  --accent-hover: #b197fc;
+  --accent-light: #1f1a2e;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --error-bg: #2d1f1f;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--accent), #d6336c);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  font-weight: 700;
+}
+
+.logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { background: var(--bg-hover); color: var(--text); }
+
+/* Main card */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  margin-bottom: -8px;
+}
+
+/* Form groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-label .optional {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+textarea, input[type="text"] {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 14px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  outline: none;
+  transition: all var(--transition);
+  resize: vertical;
+  line-height: 1.6;
+}
+
+textarea:focus, input[type="text"]:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+textarea { min-height: 80px; }
+input[type="text"] { height: 44px; }
+
+/* Settings section */
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  transition: color var(--transition);
+}
+.settings-toggle:hover { color: var(--text); }
+.settings-toggle .chevron {
+  display: inline-block;
+  transition: transform var(--transition);
+  font-size: 10px;
+}
+.settings-toggle.open .chevron { transform: rotate(180deg); }
+
+.settings-panel {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.settings-panel.visible { display: flex; }
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #d6336c);
+  color: white;
+  flex: 1;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(121, 80, 242, 0.35);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-height: 20px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(64, 192, 87, 0.4);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.status-dot.loading { background: #fcc419; box-shadow: 0 0 8px rgba(252, 196, 25, 0.5); animation: pulse 1s infinite; }
+.status-dot.success { background: var(--success); box-shadow: 0 0 6px rgba(64, 192, 87, 0.4); }
+.status-dot.error { background: var(--error); box-shadow: 0 0 6px rgba(250, 82, 82, 0.4); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  box-shadow: var(--shadow);
+  z-index: 100;
+  animation: slideIn 0.3s ease;
+  max-width: 380px;
+}
+.toast.success { background: #2b8a3e; }
+.toast.error { background: #c92a2a; }
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Field map */
+#field-map-text {
+  font-size: 13px;
+  min-height: 60px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  .card { padding: 20px; }
+  .settings-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <span class="logo-text">voca</span>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">🌙</button>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+    <div class="card-section-title">New card</div>
+
+    <div class="form-group">
+      <label class="form-label" for="target">Target word or phrase <span style="color:var(--error)">*</span></label>
+      <input type="text" id="target" placeholder="e.g. serendipity, 一期一会, rencontrer" autofocus>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="sentence">Sentence <span class="optional">— optional</span></label>
+      <textarea id="sentence" placeholder="Paste a sentence containing the target word…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="note">Note / Source <span class="optional">— optional</span></label>
+      <input type="text" id="note" placeholder="e.g. textbook page 42, NYT article">
+    </div>
+
+    <!-- AnkiConnect settings -->
+    <button class="settings-toggle" id="settings-toggle" type="button">
+      ⚙ AnkiConnect settings <span class="chevron">▾</span>
+    </button>
+
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-row">
+        <div class="form-group">
+          <label class="form-label" for="deck-name">Deck name</label>
+          <input type="text" id="deck-name" placeholder="Default">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="model-name">Note type</label>
+          <input type="text" id="model-name" placeholder="Basic">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="server-url">AnkiConnect URL</label>
+        <input type="text" id="server-url" placeholder="http://127.0.0.1:8765">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="field-map-text">Field map JSON <span class="optional">— optional</span></label>
+        <textarea id="field-map-text" placeholder='{"sentence_cloze": "Expression", "meaning": "Meaning"}'></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-row">
+      <button class="btn btn-primary" id="submit-btn">
+        <span id="btn-text">Generate &amp; add to Anki</span>
+        <span id="btn-spinner" class="spinner" style="display:none"></span>
+      </button>
+    </div>
+
+    <div class="status-bar">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Ready</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+
+// Theme
+const themeToggle = $('#theme-toggle');
+const html = document.documentElement;
+const updateThemeIcon = () => {
+  themeToggle.textContent = html.dataset.theme === 'dark' ? '☀️' : '🌙';
+};
+themeToggle.addEventListener('click', () => {
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('voca-theme', html.dataset.theme);
+  updateThemeIcon();
+});
+const saved = localStorage.getItem('voca-theme');
+if (saved) { html.dataset.theme = saved; }
+updateThemeIcon();
+
+// Settings panel
+const settingsToggle = $('#settings-toggle');
+const settingsPanel = $('#settings-panel');
+settingsToggle.addEventListener('click', () => {
+  const open = settingsPanel.classList.toggle('visible');
+  settingsToggle.classList.toggle('open', open);
+});
+
+// Load saved config
+async function loadConfig() {
+  try {
+    const res = await fetch('/api/config');
+    if (!res.ok) return;
+    const cfg = await res.json();
+    if (cfg.deck_name) $('#deck-name').value = cfg.deck_name;
+    if (cfg.model_name) $('#model-name').value = cfg.model_name;
+    if (cfg.server_url) $('#server-url').value = cfg.server_url;
+    if (cfg.field_map) {
+      $('#field-map-text').value = JSON.stringify(cfg.field_map, null, 2);
+    }
+  } catch (_) {}
+}
+loadConfig();
+
+// Status helpers
+function setStatus(state, text) {
+  const dot = $('#status-dot');
+  dot.className = 'status-dot';
+  if (state) dot.classList.add(state);
+  $('#status-text').textContent = text;
+}
+
+function setBusy(busy) {
+  const btn = $('#submit-btn');
+  btn.disabled = busy;
+  $('#btn-text').style.display = busy ? 'none' : '';
+  $('#btn-spinner').style.display = busy ? '' : 'none';
+}
+
+function showToast(message, type) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 3000);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// Submit
+$('#submit-btn').addEventListener('click', async () => {
+  const target = $('#target').value.trim();
+  if (!target) {
+    showToast('Target word cannot be empty.', 'error');
+    return;
+  }
+
+  const payload = {
+    target: target,
+    sentence: $('#sentence').value.trim() || null,
+    note: $('#note').value.trim() || null,
+    config: {
+      deck_name: $('#deck-name').value.trim() || 'Default',
+      model_name: $('#model-name').value.trim() || 'Basic',
+      server_url: $('#server-url').value.trim() || 'http://127.0.0.1:8765',
+      field_map: (() => {
+        const raw = $('#field-map-text').value.trim();
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch (_) { return null; }
+      })(),
+    },
+  };
+
+  setBusy(true);
+  setStatus('loading', 'Generating card and sending to Anki…');
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Unknown error');
+
+    setStatus('success', 'Card added to Anki ✓');
+    showToast('Card added to Anki!', 'success');
+
+    // Clear inputs
+    $('#target').value = '';
+    $('#sentence').value = '';
+    $('#note').value = '';
+    $('#target').focus();
+
+    setTimeout(() => setStatus(null, 'Ready'), 3000);
+  } catch (err) {
+    setStatus('error', 'Failed');
+    showToast(err.message, 'error');
+    setTimeout(() => setStatus(null, 'Ready'), 3000);
+  } finally {
+    setBusy(false);
+  }
+});
+
+// Keyboard shortcut: Ctrl+Enter to submit
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    $('#submit-btn').click();
+  }
+});
+
+// Focus target on load
+$('#target').focus();
+</script>
+</body>
+</html>

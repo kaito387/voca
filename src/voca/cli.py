@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import ctypes
 import ctypes.util
 import sys
@@ -230,10 +231,50 @@ class VocaWindow:
         self.root.after(100, self._poll_results)
 
 
-def main() -> None:
+def run_tk() -> None:
+    """Launch the tkinter GUI."""
     root = tk.Tk()
     VocaWindow(root)
     root.mainloop()
+
+
+def run_web(host: str = "127.0.0.1", port: int = 8080) -> None:
+    """Launch the web-based UI using FastAPI + uvicorn."""
+    import uvicorn
+    from .web import app
+
+    print(f"  🌐 voca web UI → http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port, log_level="info")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="voca",
+        description="Generate vocabulary cards with AI and send them to Anki.",
+    )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        default=False,
+        help="Launch the web-based UI instead of the tkinter GUI.",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host to bind the web server to (default: 127.0.0.1).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="Port to bind the web server to (default: 8080).",
+    )
+    args = parser.parse_args()
+
+    if args.web:
+        run_web(host=args.host, port=args.port)
+    else:
+        run_tk()
 
 
 if __name__ == "__main__":

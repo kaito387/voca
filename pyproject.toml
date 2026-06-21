@@ -8,6 +8,8 @@ dependencies = [
     "httpx>=0.28.1",
     "openai>=2.37.0",
     "requests>=2.34.2",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
 ]
 
 [project.scripts]
@@ -20,7 +22,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-voca = [".ankiconnect_config", "prompt.md"]
+voca = [".ankiconnect_config", "prompt.md", "static/index.html"]
 
 [build-system]
 requires = ["setuptools>=61"]
